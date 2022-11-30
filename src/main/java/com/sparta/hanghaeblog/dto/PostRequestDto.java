@@ -1,14 +1,14 @@
 package com.sparta.hanghaeblog.dto;
 
-import com.sparta.hanghaeblog.entity.Timestamped;
+import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
 public class PostRequestDto {
-    private Long num;
-    private String title;
     private String username;
     private String password;
+    private String title;
     private String context;
-    private Timestamped createDate;
+    private LocalDateTime registeredAt;
+    private LocalDateTime unRegisteredAt;
 }
