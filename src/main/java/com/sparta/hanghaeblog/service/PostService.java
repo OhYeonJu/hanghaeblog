@@ -42,21 +42,23 @@ public class PostService {
 
     // 포스트 수정
     @Transactional
-    public ResponseDto updatePost(Long id, PostRequestDto requestDto) {
-//        Post post = new Post();
+    public PostResponseDto updatePost(Long id, PostRequestDto requestDto) {
         Post post = postRepository.findByIdAndPassword(id, requestDto.getPassword()).orElseThrow(
                 () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
         );
         post.update(requestDto);
         postRepository.save(post);
 
-        return new ResponseDto("포스트 수정 완료", HttpStatus.OK.value());
+        return new PostResponseDto(post);
     }
 
     // 포스트 삭제
     @Transactional
-    public ResponseDto deletePost(Long id) {
+    public ResponseDto deletePost(Long id, PostRequestDto requestDto) {
         Post post = checkPost(id);
+        post = postRepository.findByIdAndPassword(id, requestDto.getPassword()).orElseThrow(
+                () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
+        );
         postRepository.delete(post);
         return new ResponseDto("포스트 삭제 성공", HttpStatus.OK.value());
     }

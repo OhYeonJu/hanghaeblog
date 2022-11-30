@@ -41,15 +41,15 @@ public class PostController {
     // 게시글 수정
     // http://localhost:8080/api/update/1~
     @PutMapping("/api/update/{id}")
-    public ResponseDto updatePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
+    public PostResponseDto updatePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
         return postService.updatePost(id, requestDto);
     }
 
     // 게시글 삭제
     // http://localhost:8080/api/delete/1~
     @DeleteMapping("/api/delete/{id}")
-    public ResponseDto deletePost(@PathVariable Long id) {
-        return postService.deletePost(id);
+    public ResponseDto deletePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
+        return postService.deletePost(id, requestDto);
     }
 
 
