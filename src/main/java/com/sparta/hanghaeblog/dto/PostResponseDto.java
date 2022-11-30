@@ -2,7 +2,6 @@ package com.sparta.hanghaeblog.dto;
 
 import com.sparta.hanghaeblog.entity.Post;
 import lombok.Getter;
-
 import java.time.LocalDateTime;
 
 @Getter

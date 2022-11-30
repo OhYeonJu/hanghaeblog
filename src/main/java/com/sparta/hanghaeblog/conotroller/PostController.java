@@ -7,9 +7,7 @@ import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,6 +49,5 @@ public class PostController {
     public ResponseDto deletePost(@PathVariable Long id, @RequestBody PostRequestDto requestDto) {
         return postService.deletePost(id, requestDto);
     }
-
 
 }

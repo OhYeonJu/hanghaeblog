@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +27,7 @@ public class PostService {
     public PostResponseDto createPost(PostRequestDto requestDto) {
         Post post = new Post(requestDto);
         postRepository.save(post); // 자동으로 쿼리가 생성되면서 데이터베이스에 연결되며 저장된다.
+
         return new PostResponseDto(post);
     }
 
@@ -37,6 +35,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostResponseDto getPost(Long id) {
         Post post = checkPost(id);
+
         return new PostResponseDto(post);
     }
 
@@ -60,6 +59,7 @@ public class PostService {
                 () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
         );
         postRepository.delete(post);
+
         return new ResponseDto("포스트 삭제 성공", HttpStatus.OK.value());
     }
 
