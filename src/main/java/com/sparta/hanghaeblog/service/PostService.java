@@ -1,8 +1,6 @@
 package com.sparta.hanghaeblog.service;
 
-import com.sparta.hanghaeblog.dto.PostRequestDto;
-import com.sparta.hanghaeblog.dto.PostResponseDto;
-import com.sparta.hanghaeblog.dto.ResponseDto;
+import com.sparta.hanghaeblog.dto.*;
 import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +16,20 @@ public class PostService {
 
     // 전체 포스트 보여주기
     @Transactional(readOnly = true)
-    public List<Post> getPost() {
-        return postRepository.findAllByOrderByModifiedAtDesc(); // 저장된 데이터들을 다 가져올 수 있다.
+    public PostListResponseDto getPosts() {
+        PostListResponseDto postListResponseDto = new PostListResponseDto();
+
+        List<Post> posts = postRepository.findAllByOrderByModifiedAtDesc(); // 최신순
+        for (Post post : posts) {
+            postListResponseDto.addPost(new PostResponseDto(post));
+        }
+
+        return postListResponseDto;
     }
+//    Dto에 담아서 반환하기
+//    public List<Post> getPost() {
+//        return postRepository.findAllByOrderByModifiedAtDesc(); // 저장된 데이터들을 다 가져올 수 있다.
+//    }
 
     // 포스트 생성
     @Transactional
@@ -42,9 +51,13 @@ public class PostService {
     // 포스트 수정
     @Transactional
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto) {
-        Post post = postRepository.findByIdAndPassword(id, requestDto.getPassword()).orElseThrow(
-                () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
-        );
+        Post post = checkPost(id);
+        if (!post.getPassword().equals(requestDto.getPassword())) {
+            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
+        }
+//        post = postRepository.findByIdAndPassword(id, requestDto.getPassword()).orElseThrow(
+//                () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
+//        );
         post.update(requestDto);
         postRepository.save(post);
 
@@ -53,11 +66,11 @@ public class PostService {
 
     // 포스트 삭제
     @Transactional
-    public ResponseDto deletePost(Long id, PostRequestDto requestDto) {
+    public ResponseDto deletePost(Long id, PostDeleteRequestDto deleteRequestDto) {
         Post post = checkPost(id);
-        post = postRepository.findByIdAndPassword(id, requestDto.getPassword()).orElseThrow(
-                () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
-        );
+        if (!post.getPassword().equals(deleteRequestDto.getPassword())) {
+            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
+        }
         postRepository.delete(post);
 
         return new ResponseDto("포스트 삭제 성공", HttpStatus.OK.value());
