@@ -5,7 +5,6 @@ import com.sparta.hanghaeblog.dto.ResponseDto;
 import com.sparta.hanghaeblog.dto.SignupRequestDto;
 import com.sparta.hanghaeblog.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -18,12 +17,10 @@ public class UserController {
 
     private final UserService userService;
 
-
     @PostMapping("/signup")
     public ResponseDto signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
         return userService.signup(signupRequestDto);
     }
-
 
     @PostMapping("/login")
     public ResponseDto login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {

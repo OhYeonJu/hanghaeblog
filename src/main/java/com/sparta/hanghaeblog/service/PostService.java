@@ -2,17 +2,24 @@ package com.sparta.hanghaeblog.service;
 
 import com.sparta.hanghaeblog.dto.*;
 import com.sparta.hanghaeblog.entity.Post;
+import com.sparta.hanghaeblog.entity.Users;
+import com.sparta.hanghaeblog.jwt.JwtUtil;
 import com.sparta.hanghaeblog.repository.PostRepository;
+import com.sparta.hanghaeblog.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     // 전체 포스트 보여주기
     @Transactional(readOnly = true)
@@ -33,11 +40,21 @@ public class PostService {
 
     // 포스트 생성
     @Transactional
-    public PostResponseDto createPost(PostRequestDto requestDto) {
+    public PostResponseDto createPost(PostRequestDto requestDto, HttpServletRequest request) {
+
+        // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 작성 가능
+        String token = jwtUtil.resolveToken(request);
+
+        if (!jwtUtil.validateToken(token)) {
+            throw new IllegalArgumentException("Token Error");
+        }
+
         Post post = new Post(requestDto);
         postRepository.save(post); // 자동으로 쿼리가 생성되면서 데이터베이스에 연결되며 저장된다.
 
         return new PostResponseDto(post);
+
+
     }
 
     // 선택 포스트 가져오기
@@ -50,14 +67,23 @@ public class PostService {
 
     // 포스트 수정
     @Transactional
-    public PostResponseDto updatePost(Long id, PostRequestDto requestDto) {
-        Post post = checkPost(id);
-        if (!post.getPassword().equals(requestDto.getPassword())) {
-            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
+    public PostResponseDto updatePost(Long id, PostRequestDto requestDto, HttpServletRequest request) {
+        // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 작성 가능
+        String token = jwtUtil.resolveToken(request);
+
+        if (!jwtUtil.validateToken(token)) {
+            throw new IllegalArgumentException("Token Error");
         }
+//        1주차 과제
+//        if (!post.getPassword().equals(requestDto.getPassword())) {
+//            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
+//        }
+//        수정하기 전
 //        post = postRepository.findByIdAndPassword(id, requestDto.getPassword()).orElseThrow(
 //                () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
 //        );
+
+        Post post = checkPost(id);
         post.update(requestDto);
         postRepository.save(post);
 
@@ -66,11 +92,17 @@ public class PostService {
 
     // 포스트 삭제
     @Transactional
-    public ResponseDto deletePost(Long id, PostDeleteRequestDto deleteRequestDto) {
-        Post post = checkPost(id);
-        if (!post.getPassword().equals(deleteRequestDto.getPassword())) {
-            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
+    public ResponseDto deletePost(Long id, PostDeleteRequestDto deleteRequestDto, HttpServletRequest request) {
+        // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 작성 가능
+        String token = jwtUtil.resolveToken(request);
+
+        if (!jwtUtil.validateToken(token)) {
+            throw new IllegalArgumentException("Token Error");
         }
+//        if (!post.getPassword().equals(deleteRequestDto.getPassword())) {
+//            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
+//        }
+        Post post = checkPost(id);
         postRepository.delete(post);
 
         return new ResponseDto("포스트 삭제 성공", HttpStatus.OK.value());

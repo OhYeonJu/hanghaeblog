@@ -11,7 +11,6 @@ import lombok.*;
 public class LoginRequestDto {
     private String userId;
     private String pw;
-
     public LoginRequestDto(Users user) {
         this.userId = user.getUserId();
         this.pw = user.getPw();
