@@ -18,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
+
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
@@ -44,17 +45,24 @@ public class PostService {
 
         // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 작성 가능
         String token = jwtUtil.resolveToken(request);
+        Claims claims;
 
-        if (!jwtUtil.validateToken(token)) {
+        if (jwtUtil.validateToken(token)) {
+            // 토큰에서 사용자 정보 가져오기
+            claims = jwtUtil.getUserInfoFromToken(token);
+        } else {
             throw new IllegalArgumentException("Token Error");
         }
 
-        Post post = new Post(requestDto);
+        // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
+        Users user = userRepository.findByUserId(claims.getSubject()).orElseThrow(
+                () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+        );
+
+        Post post = new Post(requestDto, user);
         postRepository.save(post); // 자동으로 쿼리가 생성되면서 데이터베이스에 연결되며 저장된다.
 
         return new PostResponseDto(post);
-
-
     }
 
     // 선택 포스트 가져오기

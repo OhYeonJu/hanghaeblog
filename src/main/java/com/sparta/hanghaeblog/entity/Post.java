@@ -1,11 +1,12 @@
 package com.sparta.hanghaeblog.entity;
 
 import com.sparta.hanghaeblog.dto.PostRequestDto;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
-@Getter
+@Data
 @Entity
 @NoArgsConstructor
 public class Post extends Timestamped {
@@ -22,20 +23,22 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private String password;
+    // 연관 관계 맺고 생성자 고치기
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id") // name : 매핑할 외래키의 이름을 설정합니다.
+    private Users user;
 
-    public Post(PostRequestDto requestDto) {
+
+    public Post(PostRequestDto requestDto, Users user) {
         this.title = requestDto.getTitle();
-        this.username = requestDto.getUsername();
-        this.content = requestDto.getContext();
-        this.password = requestDto.getPassword();
+//        this.username = user.getUserId(); // ??
+        this.content = requestDto.getContent();
+        this.user = user;
     }
 
     public void update(PostRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.username = requestDto.getUsername();
-        this.content = requestDto.getContext();
-        this.password = requestDto.getPassword();
+        this.content = requestDto.getContent();
     }
 }
