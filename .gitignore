@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### jwtToken ###
+src/main/resources/application.properties
