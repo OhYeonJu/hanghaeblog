@@ -1,7 +1,6 @@
 package com.sparta.hanghaeblog.service;
 
 import com.sparta.hanghaeblog.dto.*;
-import com.sparta.hanghaeblog.entity.Post;
 import com.sparta.hanghaeblog.entity.Users;
 import com.sparta.hanghaeblog.jwt.JwtUtil;
 import com.sparta.hanghaeblog.repository.UserRepository;
@@ -9,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
@@ -27,7 +25,7 @@ public class UserService {
         String userId = signupRequestDto.getUserId();
         String userPw = signupRequestDto.getPw();
 
-        // 아이디 중복 확인
+        // TODO 아이디 중복 확인 boolean
         Optional<Users> found = userRepository.findByUserId(userId);
 
         if(found.isPresent()){
@@ -51,7 +49,7 @@ public class UserService {
         );
 
         // 비밀번호 확인
-        if(!pw.equals(user.getPw())) {
+        if(!user.getPw().equals(pw)) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 

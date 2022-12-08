@@ -12,5 +12,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 'null일 수도 있는 객체'를 감싸는 일종의 Wrapper 클래스입니다.
     // 예외 : NullPointException
 //    Optional<Post> findByIdAndPassword(Long id, String password);
+    Boolean existsByUsername(String username);
 
 }

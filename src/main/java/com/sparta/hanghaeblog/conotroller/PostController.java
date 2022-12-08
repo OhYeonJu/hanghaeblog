@@ -28,7 +28,7 @@ public class PostController {
     // 게시글 작성
     // http://localhost:8080/api/post
     @PostMapping("/post")
-    public PostResponseDto createPost(@RequestBody PostRequestDto requestDto, HttpServletRequest request) {
+    public PostCreateResponseDto createPost(@RequestBody PostRequestDto requestDto, HttpServletRequest request) {
         return postService.createPost(requestDto, request);
     }
 
@@ -49,8 +49,8 @@ public class PostController {
     // 게시글 삭제
     // http://localhost:8080/api/post/1~
     @DeleteMapping("/post/{id}")
-    public ResponseDto deletePost(@PathVariable Long id, @RequestBody PostDeleteRequestDto deleteRequestDto, HttpServletRequest request) {
-        return postService.deletePost(id, deleteRequestDto, request);
+    public ResponseDto deletePost(@PathVariable Long id, HttpServletRequest request) {
+        return postService.deletePost(id, request);
     }
 
 }

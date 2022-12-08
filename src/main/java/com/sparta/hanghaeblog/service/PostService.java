@@ -18,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
@@ -41,28 +40,14 @@ public class PostService {
 
     // 포스트 생성
     @Transactional
-    public PostResponseDto createPost(PostRequestDto requestDto, HttpServletRequest request) {
+    public PostCreateResponseDto createPost(PostRequestDto requestDto, HttpServletRequest request) {
+        Users user = userTokenCheck(request);
 
-        // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 작성 가능
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
-
-        if (jwtUtil.validateToken(token)) {
-            // 토큰에서 사용자 정보 가져오기
-            claims = jwtUtil.getUserInfoFromToken(token);
-        } else {
-            throw new IllegalArgumentException("Token Error");
-        }
-
-        // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
-        Users user = userRepository.findByUserId(claims.getSubject()).orElseThrow(
-                () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-        );
-
-        Post post = new Post(requestDto, user);
+        Post post = new Post(requestDto, user.getUserId());
         postRepository.save(post); // 자동으로 쿼리가 생성되면서 데이터베이스에 연결되며 저장된다.
 
-        return new PostResponseDto(post);
+        return new PostCreateResponseDto(post, user.getUserId());
+
     }
 
     // 선택 포스트 가져오기
@@ -74,46 +59,35 @@ public class PostService {
     }
 
     // 포스트 수정
+    // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 수정 가능
     @Transactional
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto, HttpServletRequest request) {
-        // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 작성 가능
-        String token = jwtUtil.resolveToken(request);
-
-        if (!jwtUtil.validateToken(token)) {
-            throw new IllegalArgumentException("Token Error");
-        }
-//        1주차 과제
-//        if (!post.getPassword().equals(requestDto.getPassword())) {
-//            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
-//        }
-//        수정하기 전
-//        post = postRepository.findByIdAndPassword(id, requestDto.getPassword()).orElseThrow(
-//                () -> new IllegalArgumentException("패스워드가 틀렸습니다.")
-//        );
+        Users user = userTokenCheck(request);
 
         Post post = checkPost(id);
-        post.update(requestDto);
-        postRepository.save(post);
+        if (userRepository.existsByUserId(user.getUserId())) {
+            post.update(requestDto, user.getUserId());
+            postRepository.save(post);
 
-        return new PostResponseDto(post);
+            return new PostResponseDto(post);
+        } else {
+            throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
+        }
     }
 
     // 포스트 삭제
     @Transactional
-    public ResponseDto deletePost(Long id, PostDeleteRequestDto deleteRequestDto, HttpServletRequest request) {
-        // 토큰을 검사하여, 유효한 토큰일 경우에만 게시글 작성 가능
-        String token = jwtUtil.resolveToken(request);
-
-        if (!jwtUtil.validateToken(token)) {
-            throw new IllegalArgumentException("Token Error");
-        }
-//        if (!post.getPassword().equals(deleteRequestDto.getPassword())) {
-//            throw new IllegalArgumentException("패스워드가 틀렸습니다.");
-//        }
+    public ResponseDto deletePost(Long id, HttpServletRequest request) {
+        Users user = userTokenCheck(request);
         Post post = checkPost(id);
-        postRepository.delete(post);
 
-        return new ResponseDto("포스트 삭제 성공", HttpStatus.OK.value());
+        if (userRepository.existsByUserId(user.getUserId())){
+            postRepository.delete(post);
+
+            return new ResponseDto("포스트 삭제 성공", HttpStatus.OK.value());
+        } else {
+            throw new IllegalArgumentException("작성자가 일치하지 않습니다.");
+        }
     }
 
     // 포스트 번호를 체크해서 번호가 없으면 에러메세지 출력
@@ -122,5 +96,30 @@ public class PostService {
                 () -> new RuntimeException("포스트가 존재하지 않습니다.")
         );
     }
+
+    private Users userTokenCheck(HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
+
+        if(token != null) {
+            if (jwtUtil.validateToken(token)) {
+                // 토큰에서 사용자 정보 가져오기
+                claims = jwtUtil.getUserInfoFromToken(token);
+            } else {
+                throw new IllegalArgumentException("Token Error");
+            }
+
+            String username = claims.getSubject();
+            // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
+            Users user = userRepository.findByUserId(username).orElseThrow(
+                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+            );
+
+            return user;
+        }
+        throw new IllegalArgumentException("Token Error");
+
+    }
+
 
 }

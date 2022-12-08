@@ -28,17 +28,17 @@ public class Post extends Timestamped {
     @JoinColumn(name = "user_id") // name : 매핑할 외래키의 이름을 설정합니다.
     private Users user;
 
-
-    public Post(PostRequestDto requestDto, Users user) {
+    public Post(PostRequestDto requestDto, String username) {
         this.title = requestDto.getTitle();
-//        this.username = user.getUserId(); // ??
+        this.username = username;
         this.content = requestDto.getContent();
         this.user = user;
     }
 
-    public void update(PostRequestDto requestDto) {
+    public void update(PostRequestDto requestDto, String username) {
+        this.username = username;
         this.title = requestDto.getTitle();
-        this.username = requestDto.getUsername();
         this.content = requestDto.getContent();
     }
+
 }
